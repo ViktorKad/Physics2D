@@ -98,7 +98,7 @@ public interface IVector2D {
      * @param angle Угол поворота в радианах.
      * @return Данный вектор пояле поворота <code>this</code>.
      */
-    public IVector2D rotate(float angle);
+    public IVector2D rotate(double angle);
 
     /**
      * Возвращает квадрат расстояния до переданного вектора.

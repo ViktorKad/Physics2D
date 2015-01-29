@@ -34,7 +34,7 @@ public abstract class FigureFactory implements IFigure {
         return new Triangle(x1, y1, x2, y2, x3, y3);
     }
 
-    // TODO: Подумай как получать координаты столкновений
-//        public static float getCollisionX();
-//        public static float getCollisionY();
+    public static IFigure getPolygon(int maxVerticesCount) {
+        return new Polygon(maxVerticesCount);
+    }
 }

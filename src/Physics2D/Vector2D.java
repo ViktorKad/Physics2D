@@ -114,16 +114,14 @@ public class Vector2D implements IVector2D {
     }
 
     @Override
-    public IVector2D rotate(float angle) {
-        double x, y, newX, newY, sin, cos;
-        x = this.x;
-        y = this.y;
+    public IVector2D rotate(double angle) {
+        double newX, newY, sin, cos;
 
-        sin = Math.sin(angle);
-        cos = Math.cos(angle);
+        sin = StrictMath.sin(angle);
+        cos = StrictMath.cos(angle);
 
-        newX = (x * cos) - (y * sin);
-        newY = (x * sin) + (y * cos);
+        newX = (this.x * cos) - (this.y * sin);
+        newY = (this.x * sin) + (this.y * cos);
 
         this.x = (float) newX;
         this.y = (float) newY;

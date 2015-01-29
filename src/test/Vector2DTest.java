@@ -182,12 +182,24 @@ public class Vector2DTest {
     public void testRotate() throws Exception {
         System.out.println(Vector2D.class + ",  method rotate()");
         float x, y, result;
+        IVector2D v;
+
         x = y = 2f;
-        IVector2D v = new Vector2D(x, y);
+        v = new Vector2D(x, y);
         result = (float) (Math.PI / 2);
 
-        assertSame(v.rotate((float) (Math.PI / 4)), v);
+        assertSame(v.rotate(Math.PI / 4), v);
         assertTrue(v.getAngle() == result);
+
+        x = 0;
+        y = 1;
+        v = new Vector2D(x, y);
+        result = (float) (Math.PI);
+
+        assertSame(v.rotate(Math.PI / 2), v);
+        assertTrue(v.getAngle() == result);
+        assertTrue(v.getX() == -1);
+        assertTrue(Math.floor(v.getY()) == 0);
     }
 
     @Test

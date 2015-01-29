@@ -2,6 +2,8 @@ package test;
 
 import Physics2D.FigureFactory;
 import Physics2D.IFigure;
+import Physics2D.Polygon;
+import Physics2D.Vector2D;
 import org.junit.Test;
 
 import static org.junit.Assert.*;
@@ -64,5 +66,67 @@ public class IFigureTest {
         circle1 = FigureFactory.getCircle(5, 5, 2);
         rect1 = FigureFactory.getRectangle(2, 2, 6, 6);
         assertTrue(circle1.checkCollision(rect1));
+
+
+
+
+        // TODO: Исправь всё
+        System.out.println(IFigure.class + ",  method check(Polygon, Polygon)");
+        Polygon p1 = new Polygon(4);
+        p1.addVertex(new Vector2D(1, 1));
+        p1.addVertex(new Vector2D(1, 4));
+        p1.addVertex(new Vector2D(4, 4));
+        p1.addVertex(new Vector2D(4, 1));
+
+        Polygon p2 = new Polygon(4);
+        p2.addVertex(new Vector2D(3, 3));
+        p2.addVertex(new Vector2D(3, 6));
+        p2.addVertex(new Vector2D(6, 6));
+        p2.addVertex(new Vector2D(6, 3));
+
+        assertTrue(p1.checkCollision(p2));
+
+        //--------------
+        p1 = new Polygon(4);
+        p1.addVertex(new Vector2D(1, 1));
+        p1.addVertex(new Vector2D(1, 4));
+        p1.addVertex(new Vector2D(4, 4));
+        p1.addVertex(new Vector2D(4, 1));
+
+        p2 = new Polygon(4);
+        p2.addVertex(new Vector2D(5, 5));
+        p2.addVertex(new Vector2D(5, 6));
+        p2.addVertex(new Vector2D(6, 6));
+        p2.addVertex(new Vector2D(6, 5));
+
+        assertFalse(p1.checkCollision(p2));
+
+        //--------------
+        p1 = new Polygon(3);
+        p1.addVertex(new Vector2D(1, 1));
+        p1.addVertex(new Vector2D(1, 4));
+        p1.addVertex(new Vector2D(4, 1));
+
+        p2 = new Polygon(3);
+        p2.addVertex(new Vector2D(2, 2));
+        p2.addVertex(new Vector2D(2, 5));
+        p2.addVertex(new Vector2D(5, 2));
+
+        assertTrue(p1.checkCollision(p2));
+
+        //--------------
+        p1 = new Polygon(3);
+        p1.addVertex(new Vector2D(1, 1));
+        p1.addVertex(new Vector2D(1, 4));
+        p1.addVertex(new Vector2D(4, 1));
+
+        p2 = new Polygon(3);
+        p2.addVertex(new Vector2D(3, 3));
+        p2.addVertex(new Vector2D(3, 6));
+        p2.addVertex(new Vector2D(6, 3));
+        System.out.println(p1.checkCollision(p2));
+
+        assertFalse(p1.checkCollision(p2));
+
     }
 }

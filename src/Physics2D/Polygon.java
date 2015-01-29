@@ -15,7 +15,6 @@ public class Polygon implements IFigure {
 
         if (getRealVerticesCount() < getMaxVerticesCount()) {
             vertices.add(vertex);
-            maxVerticesCount++;
         }
 
         return result;
@@ -27,6 +26,21 @@ public class Polygon implements IFigure {
 
     public int getRealVerticesCount() {
         return vertices.size();
+    }
+
+    /**
+     * Получить вершину по переданному индексу.
+     * @param id Индекс вершины. Начинается с ноля.
+     * @return Вектор характеризующий нужную вершину или null в случае отстутствия вершины с таким индексом.
+     */
+    public IVector2D getVertex(int id) {
+        IVector2D result = null;
+
+        if (id < getRealVerticesCount()) {
+            result = vertices.get(id);
+        }
+
+        return result;
     }
 
     @Override
