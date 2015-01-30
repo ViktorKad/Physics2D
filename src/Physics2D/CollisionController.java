@@ -9,151 +9,76 @@ abstract class CollisionController {
         return distance <= (c1.getR() + c2.getR()) * (c1.getR() + c2.getR());
     }
 
-    public static boolean check(Rectangle r1, Rectangle r2) {
-        float r1x = r1.getLeftLowerCorner().getX();
-        float r1y = r1.getLeftLowerCorner().getY();
-        float r2x = r2.getLeftLowerCorner().getX();
-        float r2y = r2.getLeftLowerCorner().getY();
-
-        boolean result = false;
-
-        if (
-                r1x < r2x + r2.getW()
-                && r1x + r1.getW() > r2x
-                && r1y < r2y + r2.getH()
-                && r1y + r1.getH() > r2y
-                ) {
-            result = true;
-        }
-
-        return result;
-    }
-
-    public static boolean check(Rectangle r, Circle c) {
-
-        float rextClosestX = c.getCenter().getX();
-        float rextClosestY = c.getCenter().getY();
-
-        if (c.getCenter().getX() < r.getLeftLowerCorner().getX()) {
-            rextClosestX = r.getLeftLowerCorner().getX();
-        } else if (c.getCenter().getX() > r.getLeftLowerCorner().getX() + r.getW()) {
-            rextClosestX = r.getLeftLowerCorner().getX() + r.getW();
-        }
-
-        if (c.getCenter().getY() < r.getLeftLowerCorner().getY()) {
-            rextClosestY = r.getLeftLowerCorner().getY();
-        } else if (c.getCenter().getY() > r.getLeftLowerCorner().getY() + r.getH()) {
-            rextClosestY = r.getLeftLowerCorner().getY() + r.getH();
-        }
-
-        return c.getCenter().distanceSquared(rextClosestX, rextClosestY) < c.getR() * c.getR();
-    }
-
-    public static boolean check(Triangle t1, Triangle t2) {
-        //TODO: Реализовать
-        return false;
-    }
-
-    public static boolean check(Triangle t, Circle c) {
-        //TODO: Реализовать
-        return false;
-    }
-
-    public static boolean check(Triangle t, Rectangle r) {
-        //TODO: Реализовать
+    public static boolean check(Polygon p1, Circle p2) {
+        // TODO: реализовать
         return false;
     }
 
     public static boolean check(Polygon p1, Polygon p2) {
-        IVector2D axis, vertex;
-        float min1, max1, min2, max2, tmp;
+        IVector2D axis;
+        float[] minMax1, minMax2;
 
         if (p1.getRealVerticesCount() < 3 || p2.getRealVerticesCount() < 3) {
+            // Данный метод не ищет пересечения с точками и отрезками.
             return false;
         }
 
-
-        // TODO: Подумать и убрать дублирование кода
-        // Может быть поместить все вершины в один массив и по нему проходить?
-
         // Проверяем по осям проекций первого многоугольника
         for (int vertexId = 0; vertexId < p1.getRealVerticesCount(); vertexId++) {
-            // TODO: % p1.getRealVerticesCount() убери это. подумай как правильно сделать. Может стоит убрать это в получение вершины
-            axis = getProjectionAxis(p1.getVertex(vertexId), p1.getVertex((vertexId + 1) % p1.getRealVerticesCount()));
+            axis = getProjectionAxis(p1.getVertex(vertexId), p1.getVertex(vertexId + 1));
 
-            min1 = getPointProjection(p1.getVertex(0), axis);
-            max1 = min1;
-            // Нахождение проекции первого многоугольника
-            for (int i = 1; i < p1.getRealVerticesCount(); i++) {
-                tmp = getPointProjection(p1.getVertex(i), axis);
-                if (min1 > tmp) {
-                    min1 = tmp;
-                }
-                if (max1 < tmp) {
-                    max1 = tmp;
-                }
-            }
+            minMax1 = getMinMax(p1, axis);
+            minMax2 = getMinMax(p2, axis);
 
-            min2 = getPointProjection(p2.getVertex(0), axis);
-            max2 = min2;
-            // Нахождение проекции второго многоугольника
-            for (int i = 1; i < p2.getRealVerticesCount(); i++) {
-                tmp = getPointProjection(p2.getVertex(i), axis);
-                if (min2 > tmp) {
-                    min2 = tmp;
-                }
-                if (max2 < tmp) {
-                    max2 = tmp;
-                }
-            }
-
-            if (!isOverlap(min1, max1, min2, max2)) {
+            if (!isOverlap(minMax1[0], minMax1[1], minMax2[0], minMax2[1])) {
                 return false;
             }
-
         }
 
-        // TODO: Убрать дублирование кода
+        // TODO: убрать дублирование
 
         // Проверяем по осям проекций второго многоугольника
         for (int vertexId = 0; vertexId < p2.getRealVerticesCount(); vertexId++) {
-            axis = getProjectionAxis(p2.getVertex(vertexId), p2.getVertex((vertexId + 1) % p2.getRealVerticesCount()));
+            axis = getProjectionAxis(p2.getVertex(vertexId), p2.getVertex(vertexId + 1));
 
-            // Нахождение проекции первого многоугольника
-            min1 = getPointProjection(p1.getVertex(0), axis);
-            max1 = min1;
-            for (int i = 1; i < p1.getRealVerticesCount(); i++) {
-                tmp = getPointProjection(p1.getVertex(i), axis);
-                if (min1 > tmp) {
-                    min1 = tmp;
-                }
-                if (max1 < tmp) {
-                    max1 = tmp;
-                }
-            }
+            minMax1 = getMinMax(p1, axis);
+            minMax2 = getMinMax(p2, axis);
 
-            // Нахождение проекции второго многоугольника
-            min2 = getPointProjection(p2.getVertex(0), axis);
-            max2 = min2;
-            for (int i = 1; i < p2.getRealVerticesCount(); i++) {
-                tmp = getPointProjection(p2.getVertex(i), axis);
-                if (min2 > tmp) {
-                    min2 = tmp;
-                }
-                if (max2 < tmp) {
-                    max2 = tmp;
-                }
-            }
-
-            if (!isOverlap(min1, max1, min2, max2)) {
+            if (!isOverlap(minMax1[0], minMax1[1], minMax2[0], minMax2[1])) {
                 return false;
             }
-
         }
 
         return true;
     }
 
+
+    /**
+     * Получить крайние знаяения проекции.
+     * @param polygon Проецирцемая фигура.
+     * @param axis Ось проекции.
+     * @return Массив, первое значение в котором начало проекции, а второе её конец.
+     */
+    private static float[] getMinMax(Polygon polygon, IVector2D axis) {
+        float min, max, tmp;
+
+        min = getPointProjection(polygon.getVertex(0), axis);
+        max = min;
+
+        // Нахождение проекции многоугольника (polygon) на ось (axis)
+        for (int i = 1; i < polygon.getRealVerticesCount(); i++) {
+            tmp = getPointProjection(polygon.getVertex(i), axis);
+            if (min > tmp) {
+                min = tmp;
+            }
+            if (max < tmp) {
+                max = tmp;
+            }
+        }
+
+        float[] result = {min, max};
+        return result;
+    }
 
     /**
      * Получить ось проекции для стороны многоугольника.
@@ -199,7 +124,5 @@ abstract class CollisionController {
 
         return result;
     }
-
-
 
 }

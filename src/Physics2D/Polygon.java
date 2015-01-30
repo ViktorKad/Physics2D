@@ -2,7 +2,7 @@ package Physics2D;
 
 import java.util.ArrayList;
 
-public class Polygon implements IFigure {
+class Polygon implements IFigure {
     ArrayList<IVector2D> vertices = new ArrayList<>();
     int maxVerticesCount = 0;
 
@@ -31,16 +31,16 @@ public class Polygon implements IFigure {
     /**
      * Получить вершину по переданному индексу.
      * @param id Индекс вершины. Начинается с ноля.
-     * @return Вектор характеризующий нужную вершину или null в случае отстутствия вершины с таким индексом.
+     * @return Вектор характеризующий нужную вершину.
      */
     public IVector2D getVertex(int id) {
-        IVector2D result = null;
+        int verticesCount = getRealVerticesCount();
 
-        if (id < getRealVerticesCount()) {
-            result = vertices.get(id);
+        if (id >= verticesCount) {
+            id %= verticesCount;
         }
 
-        return result;
+        return vertices.get(id);
     }
 
     @Override

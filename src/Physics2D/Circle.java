@@ -22,10 +22,8 @@ class Circle implements IFigure {
 
         if (figure instanceof Circle) {
             result = CollisionController.check(this, (Circle) figure);
-        } else if (figure instanceof Rectangle) {
-            result = CollisionController.check((Rectangle) figure, this);
-        } else if (figure instanceof Triangle) {
-            result = CollisionController.check((Triangle) figure, this);
+        } else {
+            result = CollisionController.check((Polygon) figure, this);
         }
 
         return result;

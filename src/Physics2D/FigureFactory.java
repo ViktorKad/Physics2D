@@ -27,14 +27,21 @@ public abstract class FigureFactory implements IFigure {
      * @return Прямоугольник, интерфейс {@link IFigure}
      */
     public static IFigure getRectangle(float x, float y, float w, float h) {
-        return new Rectangle(x, y, w, h);
+        Polygon rect = new Polygon(4);
+        rect.addVertex(new Vector2D(x, y));
+        rect.addVertex(new Vector2D(x, y + h));
+        rect.addVertex(new Vector2D(x + w, y + h));
+        rect.addVertex(new Vector2D(x + w, y));
+
+        return rect;
     }
 
     public static IFigure getTriangle(float x1, float y1, float x2, float y2, float x3, float y3) {
-        return new Triangle(x1, y1, x2, y2, x3, y3);
-    }
+        Polygon triangle = new Polygon(3);
+        triangle.addVertex(new Vector2D(x1, y1));
+        triangle.addVertex(new Vector2D(x2, y2));
+        triangle.addVertex(new Vector2D(x3, y3));
 
-    public static IFigure getPolygon(int maxVerticesCount) {
-        return new Polygon(maxVerticesCount);
+        return triangle;
     }
 }
