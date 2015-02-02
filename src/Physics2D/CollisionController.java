@@ -15,36 +15,36 @@ abstract class CollisionController {
     }
 
     public static boolean check(Polygon p1, Polygon p2) {
-        IVector2D axis;
-        float[] minMax1, minMax2;
-
         if (p1.getRealVerticesCount() < 3 || p2.getRealVerticesCount() < 3) {
             // Данный метод не ищет пересечения с точками и отрезками.
             return false;
         }
 
-        // Проверяем по осям проекций первого многоугольника
-        for (int vertexId = 0; vertexId < p1.getRealVerticesCount(); vertexId++) {
-            axis = getProjectionAxis(p1.getVertex(vertexId), p1.getVertex(vertexId + 1));
+        // Возвращаем результат, как проверку пересечения первого многоугольника со вторым
+        // и второго с первым. Ваш КЭП.
+        return checkPolygons(p1, p1, p2) && checkPolygons(p2, p1, p2);
+    }
 
-            minMax1 = getMinMax(p1, axis);
-            minMax2 = getMinMax(p2, axis);
 
-            if (!isOverlap(minMax1[0], minMax1[1], minMax2[0], minMax2[1])) {
-                return false;
-            }
-        }
+    /**
+     * Проверяет пересечение многоугольников по осям проекций.
+     * @param axisSource Многоугольник по которому ищутся оси проекций.
+     * @param p1 Первый проецируемый многоугольник.
+     * @param p2 Второй проецируемый многоугольник.
+     * @return Возвращает true в случае пересечения многоугольников по всем осям
+     * и false в случае, если хотя бы по одной оси они не пересекаются.
+     */
+    private static boolean checkPolygons(Polygon axisSource, Polygon p1, Polygon p2) {
+        IVector2D axis;
+        Segment projection1,projection2;
 
-        // TODO: убрать дублирование
+        for (int vertexId = 0; vertexId < axisSource.getRealVerticesCount(); vertexId++) {
+            axis = getProjectionAxis(axisSource.getVertex(vertexId), axisSource.getVertex(vertexId + 1));
 
-        // Проверяем по осям проекций второго многоугольника
-        for (int vertexId = 0; vertexId < p2.getRealVerticesCount(); vertexId++) {
-            axis = getProjectionAxis(p2.getVertex(vertexId), p2.getVertex(vertexId + 1));
+            projection1 = getProjection(p1, axis);
+            projection2 = getProjection(p2, axis);
 
-            minMax1 = getMinMax(p1, axis);
-            minMax2 = getMinMax(p2, axis);
-
-            if (!isOverlap(minMax1[0], minMax1[1], minMax2[0], minMax2[1])) {
+            if (!isOverlap(projection1, projection2)) {
                 return false;
             }
         }
@@ -52,14 +52,13 @@ abstract class CollisionController {
         return true;
     }
 
-
     /**
      * Получить крайние знаяения проекции.
      * @param polygon Проецирцемая фигура.
      * @param axis Ось проекции.
-     * @return Массив, первое значение в котором начало проекции, а второе её конец.
+     * @return Отрезок, являющийся проекцией фигуры на ось.
      */
-    private static float[] getMinMax(Polygon polygon, IVector2D axis) {
+    private static Segment getProjection(Polygon polygon, IVector2D axis) {
         float min, max, tmp;
 
         min = getPointProjection(polygon.getVertex(0), axis);
@@ -76,8 +75,7 @@ abstract class CollisionController {
             }
         }
 
-        float[] result = {min, max};
-        return result;
+        return new Segment(min, max);
     }
 
     /**
@@ -108,21 +106,22 @@ abstract class CollisionController {
     }
 
     /**
-     * Проверяет пересечение двух проекций.
-     * @param min1 Минимальная позиция первой проекции.
-     * @param max1 Максимальная позиция первой проекции.
-     * @param min2 Минимальная позиция второй проекции.
-     * @param max2 Максимальная позиция второй проекции.
+     * Проверяет пересечение двух отрезков.
+     * @param s1 Первый отрезок.
+     * @param s2 Второй отрезок.
      * @return <code>true</code> в случае пересечения и <code>false</code> в обратном случае.
      */
-    private static boolean isOverlap(float min1, float max1, float min2, float max2) {
+    private static boolean isOverlap(Segment s1, Segment s2) {
         boolean result = false;
 
-        if ((min1 >= min2 && min1 <= max2) || (max1 >= min2 && max1 <= max2)) {
+        if ((s1.getA() >= s2.getA() && s1.getA() <= s2.getB())
+                || (s1.getB() >= s2.getA() && s1.getB() <= s2.getB())
+                || (s1.getA() <= s2.getA() && s1.getB() >= s2.getB())) {
             result = true;
         }
 
         return result;
     }
+
 
 }
