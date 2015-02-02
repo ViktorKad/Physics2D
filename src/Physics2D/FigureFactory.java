@@ -6,27 +6,27 @@ package Physics2D;
 public abstract class FigureFactory implements IFigure {
 
     /**
-     * Получить окружность. Используется как описывающая фигура.
+     * Получить окружность. Используется как ограничивающая фигура.
      *
      * @param x Координата <i>x</i> центра окружности.
      * @param y Координата <i>y</i> центра окружности.
      * @param r Радиус окружности.
-     * @return Окружность, интерфейс {@link IFigure}
+     * @return Окружность
      */
-    public static IFigure getCircle(float x, float y, float r) {
+    public static Circle getCircle(float x, float y, float r) {
         return new Circle(x, y, r);
     }
 
     /**
-     * Получить прямоугольник. Используется как описывающая фигура.
+     * Получить прямоугольник. Используется как ограничивающая фигура.
      *
      * @param x Координата <i>x</i> левого верхнего угла прямоугольника.
      * @param y Координата <i>y</i> левого верхнего угла прямоугольника.
      * @param w Ширина прямоугольника.
      * @param h Высота прямоугольника.
-     * @return Прямоугольник, интерфейс {@link IFigure}
+     * @return Прямоугольник
      */
-    public static IFigure getRectangle(float x, float y, float w, float h) {
+    public static Polygon getRectangle(float x, float y, float w, float h) {
         Polygon rect = new Polygon(4);
         rect.addVertex(new Vector2D(x, y));
         rect.addVertex(new Vector2D(x, y + h));
@@ -36,12 +36,29 @@ public abstract class FigureFactory implements IFigure {
         return rect;
     }
 
-    public static IFigure getTriangle(float x1, float y1, float x2, float y2, float x3, float y3) {
+    /**
+     * Получить треугольник. Используется как ограничивающая фигура.
+     * В качестве параметров выступают координаты вершин треугольника.
+     * @return Треугольник
+     */
+    public static Polygon getTriangle(float x1, float y1, float x2, float y2, float x3, float y3) {
         Polygon triangle = new Polygon(3);
         triangle.addVertex(new Vector2D(x1, y1));
         triangle.addVertex(new Vector2D(x2, y2));
         triangle.addVertex(new Vector2D(x3, y3));
 
         return triangle;
+    }
+
+    /**
+     * Получить многоугольник с необходимым количеством вершин. Используется как ограничивающая фигура.
+     * Для дополнительной информации по работе с многоугольниками, в т.ч. добавлении вершин
+     * см. {@link Polygon}
+     * @param maxVerticesCount Необходимое количество вершин.
+     * @return Многоугольник
+     * @see Polygon
+     */
+    public static Polygon getpolygon(int maxVerticesCount) {
+        return new Polygon(maxVerticesCount);
     }
 }

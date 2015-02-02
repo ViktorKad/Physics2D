@@ -1,10 +1,12 @@
 package Physics2D;
 
-public interface IFigure {
+interface IFigure {
     public void move(Vector2D v2d);
 
-    // TODO: Подумать над реализацией метода масштабирования для треугольников
-//    public void scale(float scaleTo);
+    // TODO: масштабирование производить относительно центра фигуры
+    //    public void scale(float scaleTo);
+
+    // TODO: метод rotate(angle) ?
 
     public boolean checkCollision(IFigure figure);
 }

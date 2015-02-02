@@ -1,6 +1,6 @@
 package Physics2D;
 
-class Circle implements IFigure {
+public class Circle implements IFigure {
     private IVector2D center = new Vector2D();
     private float r = 0;
     private float d = 0;
