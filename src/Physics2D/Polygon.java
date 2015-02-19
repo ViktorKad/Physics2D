@@ -74,7 +74,7 @@ public class Polygon implements IFigure {
     }
 
     @Override
-    public void move(Vector2D v2d) {
+    public void move(IVector2D v2d) {
         for (IVector2D vertex : vertices) {
             vertex.add(v2d);
         }
@@ -84,9 +84,25 @@ public class Polygon implements IFigure {
     public boolean checkCollision(IFigure figure) {
         boolean result = false;
 
-        // TODO: думай как правильно разрулить проверку с кругом
+        if (figure instanceof Circle) {
+            result = CollisionController.check(this, (Circle) figure);
+        } else {
+            result = CollisionController.check(this, (Polygon) figure);
+        }
 
-        result = CollisionController.check(this, (Polygon) figure);
+        return result;
+    }
+
+    @Override
+    public IVector2D getCollisionVector(IFigure figure) {
+        IVector2D result = null;
+
+        if (figure instanceof Circle) {
+            result = CollisionController.getCollisionVector(this, (Circle) figure);
+        } else {
+            result = CollisionController.getCollisionVector((Polygon) figure, this);
+        }
+
 
         return result;
     }

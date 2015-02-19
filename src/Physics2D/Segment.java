@@ -9,9 +9,20 @@ class Segment {
     private static float DEFAULT_B = 0;
     private float a, b;
 
+    /**
+     * Данный конструктор в поле <i>a</i> всегда добавляет меньшее
+     * , а в поле <i>b</i> большее из чисел.
+     * @param a
+     * @param b
+     */
     public Segment(float a, float b) {
-        this.a = a;
-        this.b = b;
+        if (b > a) {
+            this.a = a;
+            this.b = b;
+        } else {
+            this.a = b;
+            this.b = a;
+        }
     }
 
     public Segment() {
@@ -26,7 +37,11 @@ class Segment {
         return b;
     }
 
+    public float getCenter() {
+        return b - length() / 2;
+    }
+
     public float length() {
-        return Math.abs(b - a);
+        return b - a;
     }
 }

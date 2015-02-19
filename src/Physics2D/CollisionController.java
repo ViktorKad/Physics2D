@@ -9,9 +9,50 @@ abstract class CollisionController {
         return distance <= (c1.getR() + c2.getR()) * (c1.getR() + c2.getR());
     }
 
-    public static boolean check(Polygon p1, Circle p2) {
-        // TODO: реализовать
-        return false;
+    public static boolean check(Polygon plg, Circle crl) {
+        IVector2D axis, nearestVertex;
+        float lastDistance;
+        Segment projection1, projection2;
+
+
+        // Ближайшая к центру окружности вершина многоугольника
+        nearestVertex = plg.getVertex(3);
+        // Расстояние до последней найденой ближайшей вершины.
+        lastDistance = crl.getCenter().distanceSquared(nearestVertex);
+
+        // Проход по осям найденным от сторон прямоугольника
+        for (int vertexId = 0; vertexId < plg.getRealVerticesCount(); vertexId++) {
+            axis = getProjectionAxis(plg.getVertex(vertexId), plg.getVertex(vertexId + 1));
+
+            projection1 = getProjection(plg, axis);
+            projection2 = getProjection(crl, axis);
+
+            if (!isOverlap(projection1, projection2)) {
+                return false;
+            }
+
+            // Поиск вершины, ближайшей к центру окружности
+            if (crl.getCenter().distanceSquared(plg.getVertex(vertexId)) < lastDistance) {
+                nearestVertex = plg.getVertex(vertexId);
+                lastDistance = crl.getCenter().distanceSquared(nearestVertex);
+            }
+            // /Поиск вершины, ближайшей к центру окружности
+        }
+
+        // Проверка проекций на ось проходящую через центр окружности и ближайшую к ней вершину прямоугольника
+        axis = new Vector2D();
+        axis.setX(crl.getCenter().getX() - nearestVertex.getX());
+        axis.setY(crl.getCenter().getY() - nearestVertex.getY());
+        axis = axis.getNorm();
+
+        projection1 = getProjection(plg, axis);
+        projection2 = getProjection(crl, axis);
+
+        if (!isOverlap(projection1, projection2)) {
+            return false;
+        }
+
+        return true;
     }
 
     public static boolean check(Polygon p1, Polygon p2) {
@@ -22,7 +63,102 @@ abstract class CollisionController {
 
         // Возвращаем результат, как проверку пересечения первого многоугольника со вторым
         // и второго с первым. Ваш КЭП.
-        return checkPolygons(p1, p1, p2) && checkPolygons(p2, p1, p2);
+        return checkProjections(p1, p1, p2) && checkProjections(p2, p1, p2);
+    }
+
+    public static IVector2D getCollisionVector(Circle c1, Circle c2) {
+        // TODO: Сделать более быструю реализацию
+        float len = c1.getCenter().distanceSquared(c2.getCenter());
+        len = (c1.getR() + c2.getR()) - (float) Math.sqrt(len);
+        IVector2D result = new Vector2D();
+
+        result.setFromVector(c1.getCenter());
+        result.sub(c2.getCenter());
+        result = result.getNorm().mul(len);
+
+        // TODO: Возвращать null, если не пересекаются
+
+        return result;
+    }
+
+    public static IVector2D getCollisionVector(Polygon plg, Circle crl) {
+        IVector2D minOverlapAxis = null;
+
+        IVector2D axis, nearestVertex;
+        float lastDistance;
+        float minOverlap = 0;
+        float tmpOverlap;
+        Segment projection1, projection2;
+
+
+        // Ближайшая к центру окружности вершина многоугольника
+        nearestVertex = plg.getVertex(3);
+        // Расстояние до последней найденой ближайшей вершины.
+        lastDistance = crl.getCenter().distanceSquared(nearestVertex);
+
+        // Проход по осям найденным от сторон прямоугольника
+        for (int vertexId = 0; vertexId < plg.getRealVerticesCount(); vertexId++) {
+            axis = getProjectionAxis(plg.getVertex(vertexId), plg.getVertex(vertexId + 1));
+
+            projection1 = getProjection(plg, axis);
+            projection2 = getProjection(crl, axis);
+
+            tmpOverlap = overlapLength(projection1, projection2);
+            if (vertexId == 0 || tmpOverlap < minOverlap) {
+                minOverlap = tmpOverlap;
+                minOverlapAxis = axis;
+            }
+
+            // Поиск вершины, ближайшей к центру окружности
+            if (crl.getCenter().distanceSquared(plg.getVertex(vertexId)) < lastDistance) {
+                nearestVertex = plg.getVertex(vertexId);
+                lastDistance = crl.getCenter().distanceSquared(nearestVertex);
+            }
+            // /Поиск вершины, ближайшей к центру окружности
+        }
+
+        // Проверка проекций на ось проходящую через центр окружности и ближайшую к ней вершину прямоугольника
+        axis = new Vector2D();
+        axis.setX(crl.getCenter().getX() - nearestVertex.getX());
+        axis.setY(crl.getCenter().getY() - nearestVertex.getY());
+        axis = axis.getNorm();
+
+        projection1 = getProjection(plg, axis);
+        projection2 = getProjection(crl, axis);
+
+        tmpOverlap = overlapLength(projection1, projection2);
+        if (tmpOverlap < minOverlap) {
+            minOverlap = tmpOverlap;
+            minOverlapAxis = axis;
+        }
+
+        minOverlapAxis.mul(minOverlap);
+        return minOverlapAxis;
+    }
+
+    public static IVector2D getCollisionVector(Polygon p1, Polygon p2) {
+        IVector2D minOverlapAxis = null;
+        float minOverlap = 0;
+        float tmpOverlap;
+
+        IVector2D axis;
+        Segment projection1, projection2;
+
+        for (int vertexId = 0; vertexId < p1.getRealVerticesCount(); vertexId++) {
+            axis = getProjectionAxis(p1.getVertex(vertexId), p1.getVertex(vertexId + 1));
+
+            projection1 = getProjection(p1, axis);
+            projection2 = getProjection(p2, axis);
+
+            tmpOverlap = overlapLength(projection1, projection2);
+            if (vertexId == 0 || tmpOverlap < minOverlap) {
+                minOverlap = tmpOverlap;
+                minOverlapAxis = axis;
+            }
+        }
+
+        minOverlapAxis.mul(minOverlap);
+        return minOverlapAxis;
     }
 
 
@@ -34,7 +170,7 @@ abstract class CollisionController {
      * @return Возвращает true в случае пересечения многоугольников по всем осям
      * и false в случае, если хотя бы по одной оси они не пересекаются.
      */
-    private static boolean checkPolygons(Polygon axisSource, Polygon p1, Polygon p2) {
+    private static boolean checkProjections(Polygon axisSource, Polygon p1, Polygon p2) {
         IVector2D axis;
         Segment projection1,projection2;
 
@@ -53,10 +189,10 @@ abstract class CollisionController {
     }
 
     /**
-     * Получить крайние знаяения проекции.
-     * @param polygon Проецирцемая фигура.
+     * Получить проекцию многоугольника на ось.
+     * @param polygon Проецирцемый многоугольник.
      * @param axis Ось проекции.
-     * @return Отрезок, являющийся проекцией фигуры на ось.
+     * @return Отрезок, являющийся проекцией многоугольника на ось.
      */
     private static Segment getProjection(Polygon polygon, IVector2D axis) {
         float min, max, tmp;
@@ -74,6 +210,22 @@ abstract class CollisionController {
                 max = tmp;
             }
         }
+
+        return new Segment(min, max);
+    }
+
+    /**
+     * Получить проекцию окружности на ось.
+     * @param circle Проецирцемая окружность.
+     * @param axis Ось проекции.
+     * @return Отрезок, являющийся проекцией окружности на ось.
+     */
+    private static Segment getProjection(Circle circle, IVector2D axis) {
+        float min, max, tmp;
+
+        tmp = getPointProjection(circle.getCenter(), axis);
+        min = tmp - circle.getR();
+        max = tmp + circle.getR();
 
         return new Segment(min, max);
     }
@@ -106,22 +258,38 @@ abstract class CollisionController {
     }
 
     /**
+     * Возвращает длину пересечения отрезков.
+     * В случае отсутствия пересечения возвращает отрицательное число,
+     * равное по модулю расстоянию между отрезками.
+     * @param s1 Первый отрезок.
+     * @param s2 Второй отрезок.
+     * @return Длина пересечения отрезков.
+     */
+    private static float overlapLength(Segment s1, Segment s2) {
+        float cen1, cen2, overlapLen;
+
+        cen1 = s1.getCenter();
+        cen2 = s2.getCenter();
+
+        overlapLen = (s1.length() / 2 + s2.length() / 2);
+
+        if (cen2 > cen1) {
+            overlapLen -= cen2 - cen1;
+        } else {
+            overlapLen -= cen1 - cen2;
+        }
+
+        return overlapLen;
+    }
+
+    /**
      * Проверяет пересечение двух отрезков.
      * @param s1 Первый отрезок.
      * @param s2 Второй отрезок.
      * @return <code>true</code> в случае пересечения и <code>false</code> в обратном случае.
      */
     private static boolean isOverlap(Segment s1, Segment s2) {
-        boolean result = false;
-
-        if ((s1.getA() >= s2.getA() && s1.getA() <= s2.getB())
-                || (s1.getB() >= s2.getA() && s1.getB() <= s2.getB())
-                || (s1.getA() <= s2.getA() && s1.getB() >= s2.getB())) {
-            result = true;
-        }
-
-        return result;
+        return overlapLength(s1, s2) >= 0;
     }
-
 
 }
