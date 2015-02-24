@@ -134,6 +134,8 @@ abstract class CollisionController {
 
         minOverlapAxis.mul(minOverlap);
         return minOverlapAxis;
+
+        // TODO: Убрать дублирование кода во всех реализациях получения МВП и проверки на коллизий
     }
 
     public static IVector2D getCollisionVector(Polygon p1, Polygon p2) {
