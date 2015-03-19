@@ -16,14 +16,12 @@ public class IFigureTest {
     }
 
     @Test
-    public void testCheckCollision() throws Exception {
+    public void testCheckCollision1() throws Exception {
         Circle circle1, circle2;
-        Polygon polygon1, polygon2;
-        float result;
 
-        System.out.println(Polygon.class + " and " + Circle.class + ",  method check(Circle, Circle)");
+        System.out.println(Polygon.class + " and " + Circle.class + ",  method checkCollision(Circle, Circle)");
         // Пересечение
-        circle1 = FigureFactory.getCircle(2, 2, 1);
+        circle1 = FigureFactory.getCircle(2, 2, 1.001f);
         circle2 = FigureFactory.getCircle(4, 2, 1);
         assertTrue(circle1.checkCollision(circle2));
         assertTrue(circle2.checkCollision(circle1));
@@ -39,83 +37,108 @@ public class IFigureTest {
         circle2 = FigureFactory.getCircle(4, 2, 1);
         assertFalse(circle1.checkCollision(circle2));
         assertFalse(circle2.checkCollision(circle1));
+    }
 
+    @Test
+    public void testCheckCollision2() throws Exception {
+        Polygon rect1, rect2;
 
-        System.out.println(Polygon.class + " and " + Circle.class + ",  method check(Rectangle, Rectangle)");
+        System.out.println(Polygon.class + " and " + Circle.class + ",  method checkCollision(Rectangle, Rectangle)");
         // Пересечение по двум сторонам
-        polygon1 = FigureFactory.getRectangle(0, 0, 2, 2);
-        polygon2 = FigureFactory.getRectangle(1, 1, 2, 2);
-        assertTrue(polygon1.checkCollision(polygon2));
-        assertTrue(polygon2.checkCollision(polygon1));
+        rect1 = FigureFactory.getRectangle(0, 0, 2, 2);
+        rect2 = FigureFactory.getRectangle(1, 1, 2, 2);
+        assertTrue(rect1.checkCollision(rect2));
+        assertTrue(rect2.checkCollision(rect1));
 
         // Пересечение по одной стороне
-        polygon1 = FigureFactory.getRectangle(0, 0, 2, 2);
-        polygon2 = FigureFactory.getRectangle(-1, -1, 2, 2);
-        assertTrue(polygon1.checkCollision(polygon2));
-        assertTrue(polygon2.checkCollision(polygon1));
+        rect1 = FigureFactory.getRectangle(0, 0, 2, 2);
+        rect2 = FigureFactory.getRectangle(-1, -1, 2, 2);
+        assertTrue(rect1.checkCollision(rect2));
+        assertTrue(rect2.checkCollision(rect1));
 
         // Отсутствие пересечения
-        polygon1 = FigureFactory.getRectangle(1, 1, 10, 1);
-        polygon2 = FigureFactory.getRectangle(1, 3, 10, 1);
-        assertFalse(polygon1.checkCollision(polygon2));
-        assertFalse(polygon2.checkCollision(polygon1));
+        rect1 = FigureFactory.getRectangle(1, 1, 10, 1);
+        rect2 = FigureFactory.getRectangle(1, 3, 10, 1);
+        assertFalse(rect1.checkCollision(rect2));
+        assertFalse(rect2.checkCollision(rect1));
+    }
 
-        System.out.println(Polygon.class + " and " + Circle.class + ",  method check(Triangle, Triangle)");
+    @Test
+    public void testCheckCollision3() throws Exception {
+        Polygon trian1, trian2;
+
+        System.out.println(Polygon.class + " and " + Circle.class + ",  method checkCollision(Triangle, Triangle)");
         // Пересечение треугольников
-        polygon1 = FigureFactory.getTriangle(1,1, 1,4, 4,1);
-        polygon2 = FigureFactory.getTriangle(2,2, 2,5, 5,2);
-        assertTrue(polygon1.checkCollision(polygon2));
-        assertTrue(polygon2.checkCollision(polygon1));
+        trian1 = FigureFactory.getTriangle(1,1, 1,4, 4,1);
+        trian2 = FigureFactory.getTriangle(2,2, 2,5, 5,2);
+        assertTrue(trian1.checkCollision(trian2));
+        assertTrue(trian2.checkCollision(trian1));
 
         // Отсутствие пересечения треугольников
-        polygon1 = FigureFactory.getTriangle(1,1, 1,4, 4,1);
-        polygon2 = FigureFactory.getTriangle(3,3, 3,6, 6,3);
-        assertFalse(polygon1.checkCollision(polygon2));
-        assertFalse(polygon2.checkCollision(polygon1));
+        trian1 = FigureFactory.getTriangle(1,1, 1,4, 4,1);
+        trian2 = FigureFactory.getTriangle(3,3, 3,6, 6,3);
+        assertFalse(trian1.checkCollision(trian2));
+        assertFalse(trian2.checkCollision(trian1));
+    }
 
-        System.out.println(Polygon.class + " and " + Circle.class + ",  method check(Rectangle, Triangle)");
+    @Test
+    public void testCheckCollision4() throws Exception {
+        Polygon trian, rect;
+
+        System.out.println(Polygon.class + " and " + Circle.class + ",  method checkCollision(Rectangle, Triangle)");
         // Пересечение треугольника и прямоугольника
-        polygon1 = FigureFactory.getTriangle(5,5, 5,10, 10,5);
-        polygon2 = FigureFactory.getRectangle(7, 7, 8, 2);
-        assertTrue(polygon1.checkCollision(polygon2));
-        assertTrue(polygon2.checkCollision(polygon1));
+        trian = FigureFactory.getTriangle(5, 5, 5, 10, 10, 5);
+        rect = FigureFactory.getRectangle(7, 7, 8, 2);
+        assertTrue(trian.checkCollision(rect));
+        assertTrue(rect.checkCollision(trian));
+    }
 
-        System.out.println(Polygon.class + " and " + Circle.class + ",  method check(Circle, Rectangle)");
+    @Test
+    public void testCheckCollision5() throws Exception {
+        Circle circle;
+        Polygon polygon;
+
+        System.out.println(Polygon.class + " and " + Circle.class + ",  method checkCollision(Circle, Polygon)");
         // Пересечение круга с двумя сторонами прямоугольника.
-        circle1 = FigureFactory.getCircle(2, 2, 1);
-        polygon1 = FigureFactory.getRectangle(0, 0, 1.7f, 1.7f);
-        assertTrue(circle1.checkCollision(polygon1));
-        assertTrue(polygon1.checkCollision(circle1));
+        circle = FigureFactory.getCircle(2, 2, 1);
+        polygon = FigureFactory.getRectangle(0, 0, 1.7f, 1.7f);
+        assertTrue(circle.checkCollision(polygon));
+        assertTrue(polygon.checkCollision(circle));
 
         // Пересечение круга с одной из сторон треугольника.
-        circle1 = FigureFactory.getCircle(4, 2, 1);
-        polygon1 = FigureFactory.getTriangle(0,0, 0,3, 6,0);
-        assertTrue(circle1.checkCollision(polygon1));
-        assertTrue(polygon1.checkCollision(circle1));
+        circle = FigureFactory.getCircle(4, 2, 1);
+        polygon = FigureFactory.getTriangle(0,0, 0,3, 6,0);
+        assertTrue(circle.checkCollision(polygon));
+        assertTrue(polygon.checkCollision(circle));
 
         // Отсутствие пересечения с прямоугольником
-        circle1 = FigureFactory.getCircle(2, 2, 0.9f);
-        polygon1 = FigureFactory.getRectangle(0, 0, 1, 1);
-        assertFalse(circle1.checkCollision(polygon1));
-        assertFalse(polygon1.checkCollision(circle1));
+        circle = FigureFactory.getCircle(2, 2, 0.9f);
+        polygon = FigureFactory.getRectangle(0, 0, 1, 1);
+        assertFalse(circle.checkCollision(polygon));
+        assertFalse(polygon.checkCollision(circle));
 
-        circle1 = FigureFactory.getCircle(8, 8, 3);
-        polygon1 = FigureFactory.getRectangle(10.9f, 10.9f, 6, 6);
-        assertFalse(circle1.checkCollision(polygon1));
-        assertFalse(polygon1.checkCollision(circle1));
+        circle = FigureFactory.getCircle(8, 8, 3);
+        polygon = FigureFactory.getRectangle(10.9f, 10.9f, 6, 6);
+        assertFalse(circle.checkCollision(polygon));
+        assertFalse(polygon.checkCollision(circle));
 
         // Отсутствие пересечения с треугольником.
-        circle1 = FigureFactory.getCircle(3, 3, 1);
-        polygon1 = FigureFactory.getTriangle(0,0, 0,3, 6,0);
-        assertFalse(circle1.checkCollision(polygon1));
-        assertFalse(polygon1.checkCollision(circle1));
+        circle = FigureFactory.getCircle(3, 3, 1);
+        polygon = FigureFactory.getTriangle(0,0, 0,3, 6,0);
+        assertFalse(circle.checkCollision(polygon));
+        assertFalse(polygon.checkCollision(circle));
 
         // Окружность вписанная в прямоугольник
-        circle1 = FigureFactory.getCircle(5, 5, 2);
-        polygon1 = FigureFactory.getRectangle(2, 2, 6, 6);
-        assertTrue(circle1.checkCollision(polygon1));
-        assertTrue(polygon1.checkCollision(circle1));
+        circle = FigureFactory.getCircle(5, 5, 2);
+        polygon = FigureFactory.getRectangle(2, 2, 6, 6);
+        assertTrue(circle.checkCollision(polygon));
+        assertTrue(polygon.checkCollision(circle));
+    }
 
+    @Test
+    public void getCollisionVector1() throws Exception {
+        Circle circle1, circle2;
+        float result;
 
         System.out.println(Polygon.class + " and " + Circle.class + ",  method getCollisionVector(Circle, Circle)");
         circle1 = FigureFactory.getCircle(5, 5, 2);
@@ -134,12 +157,30 @@ public class IFigureTest {
         result = 0;
         assertTrue(circle2.getCollisionVector(circle1).getAngle() == result);
 
+        circle1 = FigureFactory.getCircle(5, 5, 2);
+        circle2 = FigureFactory.getCircle(9.1f, 5, 2);
+        assertNull(circle1.getCollisionVector(circle2));
+        assertNull(circle2.getCollisionVector(circle1));
+    }
 
-//        System.out.println("|||||||||||||||||||||||||||||||||||||||||");
-//        circle1 = FigureFactory.getCircle(2, 2, 2);
-//        circle2 = FigureFactory.getCircle(4, 4, 2);
-//        System.out.println(circle1.getCollisionVector(circle2));
-//        System.out.println(circle2.getCollisionVector(circle1));
+    @Test
+    public void getCollisionVector() throws Exception {
+        Circle circle1, circle2;
+        Polygon polygon1, polygon2;
+        float result;
+
+
+
+
+
+
+
+
+
+
+
+
+
 
     }
 }
