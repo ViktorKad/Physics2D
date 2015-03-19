@@ -1,58 +1,26 @@
 package Physics2D;
 
 abstract class CollisionController {
-    public static IVector2D tmp = new Vector2D();
 
     public static boolean check(Circle c1, Circle c2) {
-        float distance = c1.getCenter().distanceSquared(c2.getCenter());
+        if (getCollisionVector(c1, c2) != null) {
+            return true;
+        }
 
-        return distance <= (c1.getR() + c2.getR()) * (c1.getR() + c2.getR());
+        return false;
     }
 
     public static boolean check(Polygon plg, Circle crl) {
-        IVector2D axis, nearestVertex;
-        float lastDistance;
-        Segment projection1, projection2;
-
-
-        // Ближайшая к центру окружности вершина многоугольника
-        nearestVertex = plg.getVertex(3);
-        // Расстояние до последней найденой ближайшей вершины.
-        lastDistance = crl.getCenter().distanceSquared(nearestVertex);
-
-        // Проход по осям найденным от сторон прямоугольника
-        for (int vertexId = 0; vertexId < plg.getRealVerticesCount(); vertexId++) {
-            axis = getProjectionAxis(plg.getVertex(vertexId), plg.getVertex(vertexId + 1));
-
-            projection1 = getProjection(plg, axis);
-            projection2 = getProjection(crl, axis);
-
-            if (!isOverlap(projection1, projection2)) {
-                return false;
-            }
-
-            // Поиск вершины, ближайшей к центру окружности
-            if (crl.getCenter().distanceSquared(plg.getVertex(vertexId)) < lastDistance) {
-                nearestVertex = plg.getVertex(vertexId);
-                lastDistance = crl.getCenter().distanceSquared(nearestVertex);
-            }
-            // /Поиск вершины, ближайшей к центру окружности
-        }
-
-        // Проверка проекций на ось проходящую через центр окружности и ближайшую к ней вершину прямоугольника
-        axis = new Vector2D();
-        axis.setX(crl.getCenter().getX() - nearestVertex.getX());
-        axis.setY(crl.getCenter().getY() - nearestVertex.getY());
-        axis = axis.getNorm();
-
-        projection1 = getProjection(plg, axis);
-        projection2 = getProjection(crl, axis);
-
-        if (!isOverlap(projection1, projection2)) {
+        if (plg.getRealVerticesCount() < 3) {
+            // Данный метод не ищет пересечения с точками и отрезками.
             return false;
         }
 
-        return true;
+        if (getCollisionVector(plg, crl) != null) {
+            return true;
+        }
+
+        return false;
     }
 
     public static boolean check(Polygon p1, Polygon p2) {
@@ -61,22 +29,27 @@ abstract class CollisionController {
             return false;
         }
 
-        // Возвращаем результат, как проверку пересечения первого многоугольника со вторым
-        // и второго с первым. Ваш КЭП.
-        return checkProjections(p1, p1, p2) && checkProjections(p2, p1, p2);
+        if (getCollisionVector(p1, p2) != null) {
+            return true;
+        }
+
+        return false;
     }
 
     public static IVector2D getCollisionVector(Circle c1, Circle c2) {
-        // TODO: Сделать более быструю реализацию
+        IVector2D result = null;
         float len = c1.getCenter().distanceSquared(c2.getCenter());
-        len = (c1.getR() + c2.getR()) - (float) Math.sqrt(len);
-        IVector2D result = new Vector2D();
+        float radiusDistancePow2 = c1.getR() + c2.getR();
+        radiusDistancePow2 *= radiusDistancePow2;
 
-        result.setFromVector(c1.getCenter());
-        result.sub(c2.getCenter());
-        result = result.getNorm().mul(len);
+        if (len < radiusDistancePow2) {
+            len = (c1.getR() + c2.getR()) - (float) Math.sqrt(len);
+            result = new Vector2D();
 
-        // TODO: Возвращать null, если не пересекаются
+            result.setFromVector(c1.getCenter());
+            result.sub(c2.getCenter());
+            result = result.getNorm().mul(len);
+        }
 
         return result;
     }
@@ -86,7 +59,7 @@ abstract class CollisionController {
 
         IVector2D axis, nearestVertex;
         float lastDistance;
-        float minOverlap = 0;
+        float minOverlap = -1;
         float tmpOverlap;
         Segment projection1, projection2;
 
@@ -104,6 +77,13 @@ abstract class CollisionController {
             projection2 = getProjection(crl, axis);
 
             tmpOverlap = overlapLength(projection1, projection2);
+
+            if (tmpOverlap <= 0) {
+                // Если нашли ось по которой нет пересечения.
+                // См. теорему о разделяющей оси
+                return null;
+            }
+
             if (vertexId == 0 || tmpOverlap < minOverlap) {
                 minOverlap = tmpOverlap;
                 minOverlapAxis = axis;
@@ -127,15 +107,23 @@ abstract class CollisionController {
         projection2 = getProjection(crl, axis);
 
         tmpOverlap = overlapLength(projection1, projection2);
+
+        if (tmpOverlap <= 0) {
+            // Если нашли ось по которой нет пересечения.
+            // См. теорему о разделяющей оси
+            return null;
+        }
+
         if (tmpOverlap < minOverlap) {
             minOverlap = tmpOverlap;
             minOverlapAxis = axis;
         }
 
-        minOverlapAxis.mul(minOverlap);
-        return minOverlapAxis;
+        if (minOverlapAxis != null) {
+            minOverlapAxis.mul(minOverlap);
+        }
 
-        // TODO: Убрать дублирование кода во всех реализациях получения МВП и проверки на коллизий
+        return minOverlapAxis;
     }
 
     public static IVector2D getCollisionVector(Polygon p1, Polygon p2) {
@@ -153,41 +141,24 @@ abstract class CollisionController {
             projection2 = getProjection(p2, axis);
 
             tmpOverlap = overlapLength(projection1, projection2);
+
+            if (tmpOverlap <= 0) {
+                // Если нашли ось по которой нет пересечения.
+                // См. теорему о разделяющей оси
+                return null;
+            }
+
             if (vertexId == 0 || tmpOverlap < minOverlap) {
                 minOverlap = tmpOverlap;
                 minOverlapAxis = axis;
             }
         }
 
-        minOverlapAxis.mul(minOverlap);
-        return minOverlapAxis;
-    }
-
-
-    /**
-     * Проверяет пересечение многоугольников по осям проекций.
-     * @param axisSource Многоугольник по которому ищутся оси проекций.
-     * @param p1 Первый проецируемый многоугольник.
-     * @param p2 Второй проецируемый многоугольник.
-     * @return Возвращает true в случае пересечения многоугольников по всем осям
-     * и false в случае, если хотя бы по одной оси они не пересекаются.
-     */
-    private static boolean checkProjections(Polygon axisSource, Polygon p1, Polygon p2) {
-        IVector2D axis;
-        Segment projection1,projection2;
-
-        for (int vertexId = 0; vertexId < axisSource.getRealVerticesCount(); vertexId++) {
-            axis = getProjectionAxis(axisSource.getVertex(vertexId), axisSource.getVertex(vertexId + 1));
-
-            projection1 = getProjection(p1, axis);
-            projection2 = getProjection(p2, axis);
-
-            if (!isOverlap(projection1, projection2)) {
-                return false;
-            }
+        if (minOverlapAxis != null) {
+            minOverlapAxis.mul(minOverlap);
         }
 
-        return true;
+        return minOverlapAxis;
     }
 
     /**
